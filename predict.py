@@ -87,15 +87,16 @@ class Predictor(BasePredictor):
 
     def predict(
         self,
-        start_prompt: str = Input(description="The prompt for your audio", default="funky synth solo"),
-        end_prompt: str = Input(description="The prompt to transition to, leave blank if no transition", default=None),
-        alpha: float = Input(description="Interpolation alpha if transitioning. A value of 0 uses start fully, a value of 1 uses end fully",
+        prompt_a: str = Input(description="The prompt for your audio", default="funky synth solo"),
+        denoising: float = Input(description="How much to transform input spectrogram", default=0.75, ge=0, le=1),
+        prompt_b: str = Input(description="The second prompt to interpolate with the first, leave blank if no interpolation", default=None),
+        alpha: float = Input(description="Interpolation alpha if using two prompts. A value of 0 uses prompt_a fully, a value of 1 uses prompt_b fully",
             default=0.5,
             ge=0,
             le=1),
         num_inference_steps: int = Input(description="Number of steps to run the diffusion model", default=50, ge=1),
         seed_image_id: str = Input(
-            description="Seed image to use",
+            description="Seed spectrogram to use",
             default="vibes",
             choices=SEED_IMAGES),
 
@@ -110,14 +111,14 @@ class Predictor(BasePredictor):
         init_image = PIL.Image.open(str(init_image_path)).convert("RGB")
 
         # fake max ints
-        start_seed = np.random.randint(0, 2147483647)
-        end_seed = np.random.randint(0, 2147483647)
+        seed_a = np.random.randint(0, 2147483647)
+        seed_b = np.random.randint(0, 2147483647)
 
-        start = PromptInput(prompt=start_prompt, seed=start_seed)
-        if not end_prompt: # no transition
-            end_prompt = start_prompt
+        start = PromptInput(prompt=prompt_a, seed=seed_a, denoising=denoising)
+        if not prompt_b: # no transition
+            prompt_b = prompt_a
             alpha=0
-        end = PromptInput(prompt=end_prompt, seed=end_seed)
+        end = PromptInput(prompt=prompt_b, seed=seed_b, denoising=denoising)
         input = InferenceInput(start=start, 
             end=end, 
             alpha=alpha, 
