@@ -1,9 +1,15 @@
 # riffusion
 
-To run: first download weights with `cog run script/download-weights`
+[riffusion](https://www.riffusion.com/about) as a Cog model.
 
-Then run `cog predict` as normal. 
+First, [install Cog](https://github.com/replicate/cog) and download the weights:
 
-Enables generating a transition between two prompts & seeding of generated music with an existing spectrogram. See here for details: https://www.riffusion.com/about
+    cog run script/download-weights
 
-TODO: enable generation of longer samples / transitions w/steps in alpha 
+Then, you can run predictions:
+
+    cog predict -i prompt="funky synth solo"
+    
+And push it to Replicate:
+
+    cog push r8.im/hmartiro/riffusion
